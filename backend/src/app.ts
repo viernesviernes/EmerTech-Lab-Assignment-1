@@ -1,10 +1,14 @@
-import express from 'express'
+require('./models/user.model');
+
+var mongoose = require('./config/mongoose'),
+ express = require('./config/express');
+
+require('dotenv').config({ path: './src/config/.env' });
+console.log(process.env.S3_BUCKET)
+
+mongoose();
 
 const app = express();
-
-// app.get('/', (req, res) => {
-//   res.send('Hello World')
-// })
 
 
 
