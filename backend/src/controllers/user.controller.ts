@@ -114,7 +114,7 @@ function isLoggedIn (req: Request, res: Response, next: NextFunction) {
 
 
 function testRoute (req: Request, res: Response){
-    res.status(200).send({message: "Everything is good yay, you are authorized"})
+    res.status(200).send({message: "This route is protected"})
 } 
 
 module.exports = {
