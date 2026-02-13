@@ -15,7 +15,6 @@ function getUserModel(): Model<UserDocument> {
 function CreateUser(req: any, res: any, next: any) {
     const User = getUserModel();
     const user: UserDocument = new User(req.body);
-    console.log("body: " + req.body);
 
     user.save()
         .then((savedUser: UserDocument) => {
@@ -26,9 +25,61 @@ function CreateUser(req: any, res: any, next: any) {
         });
 }
 
+async function updateUser(req: Request, res: Response){
+    const User = getUserModel();
+    const userId = (req as any).userId;
+
+    try{
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            req.body,{
+                new: true,
+                runValidators: true
+            }
+        ).select("-password");
+
+        if(!updatedUser){
+            return res.status(404).json({message: "User not found"});
+        }
+
+        return res.status(200).json({data: updatedUser});
+    }catch (err: any){
+        res.status(500).json({message: err.message})
+    }
+};
+
+async function getUserInfo(req: Request, res: Response){
+    const User = getUserModel();
+    const userId = (req as any).userId;
+
+    try{
+        const user = await User.findById(userId).select("-password");
+
+        if(!user) return res.status(404).json({message: "User not found"});
+
+        res.status(200).json({data: user});
+    }catch(err: any){
+        res.status(500).json({message: err.message})
+    }
+};
+
+async function deleteUser(req: Request, res: Response){
+    const User = getUserModel();
+    const userId = (req as any).userId;
+    try{
+        const deletedUser = await User.findByIdAndDelete(userId);
+
+        if(!deletedUser) return res.status(404).json({message: "User not found"});
+
+        res.status(200).json({data: deletedUser});
+    }catch(err: any){
+        res.status(500).json({message: err.message})
+    }
+};
+
+
 async function authenticate(req: Request, res: Response, next: NextFunction) {
     try {
-        console.log(req.body);
         const { email, password } = req.body;
 
         const User = getUserModel();
@@ -100,6 +151,7 @@ function isLoggedIn (req: Request, res: Response, next: NextFunction) {
     var payload: any;
     try {
         payload = jwt.verify(token, jwtKey);
+        (req as any).userId = payload.id;
     } catch (e) {
         if (e instanceof jwt.JsonWebTokenError) {
             return res.status(401).end();
@@ -110,11 +162,9 @@ function isLoggedIn (req: Request, res: Response, next: NextFunction) {
     next();
 }
 
-
-
-
 function testRoute (req: Request, res: Response){
-    res.status(200).send({message: "This route is protected"})
+    const userId = (req as any).userId;
+    res.status(200).send({message: `This route is protected, your id is: ${userId}`, })
 } 
 
 module.exports = {
@@ -123,5 +173,8 @@ module.exports = {
     signout,
     isSignedIn,
     isLoggedIn,
+    getUserInfo,
+    updateUser,
+    deleteUser,
     testRoute
 };
