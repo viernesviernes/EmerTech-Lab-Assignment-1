@@ -12,6 +12,22 @@ function getAdminModel(): Model<AdminDocument>{
     return mongoose.model<AdminDocument>('Admin')
 }
 
+async function createAdmin(req: Request, res: Response) {
+    const { adminKey, userName, email, password } = req.body;
+    if (adminKey !== process.env.ADMIN_KEY) {
+        return res.status(403).json({ message: 'Invalid admin key' });
+    }
+    const Admin = getAdminModel();
+    const admin = new Admin({ userName, email, password });
+    try {
+        const saved = await admin.save();
+        const out = saved.toObject();
+        delete (out as any).password;
+        return res.status(201).json({ data: out });
+    } catch (err: any) {
+        return res.status(500).json({ message: err.message });
+    }
+}
 
 async function listAllStudents (req: Request, res: Response){
     const User = getUserModel();
@@ -80,6 +96,7 @@ function testRoute (req: Request, res: Response){
 } 
 
 module.exports = {
+    createAdmin,
     listAllStudents,
     createStudentAccount,
     updateStudentAccount,

@@ -16,14 +16,14 @@ function StudentLogin() {
         event.preventDefault();
 
         try {
-                const response = await fetch(`/api/login`, {
+                const response = await fetch(`http://localhost:3000/signin/student`, {
                 method: 'POST',
                 headers: {
                 'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ username, password }),
+                body: JSON.stringify({ email: username, password: password }),
             });
-
+            
             if (response.ok) {
                 const { student } = await response.json();
                 await SaveUser(student);
@@ -31,6 +31,8 @@ function StudentLogin() {
                 navigate('/students');
             } else {
                 console.error('Login failed:', response.statusText);
+                const data = await response.json();
+                window.alert(data.message);
             }
         } catch (error) {
             console.error('Error during login:', error);

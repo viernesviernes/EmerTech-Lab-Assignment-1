@@ -8,6 +8,8 @@ function setUserIdFromParam(req: any, res: any, next: any) {
 }
 
 module.exports = (app: any) => {
+    // Create admin (public route; requires adminKey in body to match env ADMIN_KEY)
+    app.post('/admin/create', admin.createAdmin);
     // Protected admin routes (require login + admin role)
     app.get('/admin/students', auth.isLoggedIn, auth.isAdmin, admin.listAllStudents);
     app.post('/admin/student', auth.isLoggedIn, auth.isAdmin, admin.createStudentAccount);

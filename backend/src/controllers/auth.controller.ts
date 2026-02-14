@@ -33,7 +33,7 @@ function signInHandler(isAdmin: boolean){
         }
 
         if (!user) {
-            return res.json({
+            return res.status(401).json({
                 status: "error",
                 message: "Invalid email/password!!!",
                 data: null
