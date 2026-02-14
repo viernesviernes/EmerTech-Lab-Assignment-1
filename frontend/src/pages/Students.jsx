@@ -60,7 +60,7 @@ export default function StudentDashboard() {
     };
 
     const deleteCourse = async (course) => {
-        const response = fetch(`/api/courses/${course.courseCode}`, {
+        const response = await fetch(`/api/courses/${course.courseCode}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
