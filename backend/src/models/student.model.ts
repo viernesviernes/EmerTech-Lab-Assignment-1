@@ -6,7 +6,7 @@ const saltRounds = 10;
 
 const Schema = mongoose.Schema;
 
-const UserSchema = new Schema({
+const StudentSchema = new Schema({
     studentNumber: { type: Number, required: true, unique: true },
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
@@ -33,26 +33,21 @@ const UserSchema = new Schema({
 
 });
 
-UserSchema.pre('save', function(this: any, next: () => void){
-	//hash the password before saving it
+StudentSchema.pre('save', function(this: any, next: () => void){
 	this.password = bcrypt.hashSync(this.password, saltRounds);
 	next();
 });
 
-UserSchema.methods.authenticate = function(this: any, password: string) {
-	//compare the hashed password of the database 
-	//with the hashed version of the password the user enters
+StudentSchema.methods.authenticate = function(this: any, password: string) {
 	return bcrypt.compareSync(password, this.password);
 };
 
-UserSchema.set('toJSON', {
+StudentSchema.set('toJSON', {
 	getters: true,
 	virtuals: true
 });
 
-// ---- Type definitions for TypeScript ----
-// Basic fields that match the schema, plus the instance method authenticate
-export interface IUser {
+export interface IStudent {
     studentNumber: number;
     firstName: string;
     lastName: string;
@@ -68,7 +63,6 @@ export interface IUser {
     authenticate(password: string): boolean;
 }
 
-// A Mongoose document that has both Document properties and IUser fields/methods
-export type UserDocument = IUser & Document;
+export type StudentDocument = IStudent & Document;
 
-mongoose.model('User', UserSchema);
+mongoose.model('Student', StudentSchema);
