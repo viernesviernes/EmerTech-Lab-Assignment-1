@@ -30,10 +30,10 @@ function createStudentAccount(req: any, res: any, next: any) {
 
     user.save()
         .then((savedUser: StudentDocument) => {
-            res.json(savedUser);
+            return res.status(200).json(savedUser);
         })
         .catch((err: any) => {
-            return next(err);
+            return res.status(500).json({message: err.message});
         });
 }
 
