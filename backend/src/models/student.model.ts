@@ -10,6 +10,7 @@ const StudentSchema = new Schema({
     studentNumber: { type: Number, required: true, unique: true },
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
+    username:  { type: String, required: true },
     password: { 
         type: String, 
         validate: [

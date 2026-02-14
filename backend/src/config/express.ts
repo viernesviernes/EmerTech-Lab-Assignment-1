@@ -29,12 +29,12 @@ module.exports = function () {
     }));
     app.use(bodyParser.json()); //use middleware that only parses json
     app.use(cookieParser());
-    app.use(function(req: any, res: any, next: any) {
-		res.header("Access-Control-Allow-Origin", "*");
-		res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-		next();
-    });
-    app.use(cors());
+    // CORS: use specific origin + credentials so cookies work with credentials: 'include'
+    app.use(cors({
+        origin: 'http://localhost:5173',
+        credentials: true,
+        allowedHeaders: ['Content-Type', 'Accept'],
+    }));
     //
     app.use(methodOverride()); // use HTTP verbs such as PUT or DELETE in places where the client doesn't support it.
     //handle the use of PUT or DELETE methods

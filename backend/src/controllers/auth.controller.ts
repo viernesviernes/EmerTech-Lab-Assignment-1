@@ -21,40 +21,40 @@ function getAdminModel(): Model<AdminDocument>{
 function signInHandler(isAdmin: boolean){
     return async function signIn(req: Request, res: Response, next: NextFunction) {
     try {
-        const { email, password } = req.body;
+        const { username, password } = req.body;
 
         console.log("This user is a admin?: ", isAdmin)
 
         let user: AdminDocument | StudentDocument | null;
         if (isAdmin) {
-            user = await getAdminModel().findOne({ email }).exec();
+            user = await getAdminModel().findOne({ username }).exec();
         } else {
-            user = await getUserModel().findOne({ email }).exec();
+            user = await getUserModel().findOne({ username }).exec();
         }
 
         if (!user) {
             return res.status(401).json({
                 status: "error",
-                message: "Invalid email/password!!!",
+                message: "Invalid username/password!!!",
                 data: null
             });
         }
 
         if (bcrypt.compareSync(password, user.password)) {
             const token = jwt.sign(
-                { id: user.id, email: user.email, role: isAdmin ? "admin" : "student" },
+                { id: user.id, username: user.username, role: isAdmin ? "admin" : "student" },
                 jwtKey,
                 { algorithm: 'HS256', expiresIn: 300 }
             );
 
             res.cookie('token', token, { maxAge: 300 * 1000, httpOnly: true });
-            res.status(200).send({ screen: user.email });
+            res.status(200).send({ screen: user.username });
 
             return next();
         } else {
             res.json({
                 status: "error",
-                message: "Invalid email/password!!!",
+                message: "Invalid username/password!!!",
                 data: null
             });
         }
