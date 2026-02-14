@@ -23,7 +23,7 @@ function AdminLogin() {
                 headers: {
                 'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ username, password }),
+                body: JSON.stringify({ username: username, password: password }),
                 credentials: 'include'
             });
 
@@ -41,8 +41,9 @@ function AdminLogin() {
     };
 
     if (user) {
-        navigate('/students');
+        navigate('/admin-dashboard');
     }
+
     else {
         return (
             <div>
