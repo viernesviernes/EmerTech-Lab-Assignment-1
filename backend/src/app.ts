@@ -1,4 +1,6 @@
-require('./models/user.model');
+require('./models/student.model');
+require('./models/course.model');
+require('./models/admin.model');
 
 var mongoose = require('./config/mongoose'),
  express = require('./config/express');
