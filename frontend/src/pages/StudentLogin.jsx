@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
 
@@ -27,7 +27,7 @@ function StudentLogin() {
             
             if (response.ok) {
                 const { student } = await response.json();
-                await SaveUser(student);
+                SaveUser(student);
                 console.log('Login successful:', student);
                 navigate('/students');
             } else {
@@ -40,8 +40,14 @@ function StudentLogin() {
         }
     };
 
+    useEffect(() => {
+        if (user) {
+            navigate('/students');
+        }
+    }, [user, navigate]);
+
     if (user) {
-        navigate('/students');
+        return null;
     }
     else {
         return (

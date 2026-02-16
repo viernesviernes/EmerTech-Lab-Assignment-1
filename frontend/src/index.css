@@ -135,3 +135,94 @@ button {
     align-items: center;
     justify-content: flex-end;
 }
+/* Course Card Styles */
+.course-card {
+    border-radius: 12px;
+    padding: 24px;
+    margin: 16px 0;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.course-card h3 {
+    margin: 0 0 16px 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    padding-bottom: 12px;
+}
+
+.course-card p {
+    margin: 8px 0;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.course-card ul {
+    margin: 12px 0 0 0;
+    padding-left: 24px;
+    list-style-type: none;
+}
+
+/* Add Course Section */
+.add-course-section {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px auto;
+    width: 90%;
+    max-width: 900px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.add-course-section h2 {
+    margin: 0 0 20px 0;
+    color: #333;
+    font-size: 1.5rem;
+    border-bottom: 3px solid #667eea;
+    padding-bottom: 12px;
+}
+
+.add-course-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr auto;
+    gap: 12px;
+    align-items: flex-end;
+}
+
+.add-course-inputs input {
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+}
+
+.add-course-inputs input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.add-course-inputs button {
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.add-course-inputs button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+/* Courses Container */
+.courses-container {
+    width: 90%;
+    max-width: 900px;
+    margin: 20px auto;
+}
