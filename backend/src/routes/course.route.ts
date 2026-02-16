@@ -3,6 +3,7 @@ const auth = require('../controllers/auth.controller')
 
 module.exports = (app: any) => {
     app.get('/courses', auth.isLoggedIn, auth.isAdmin ,course.listAllCourses);
+    app.get('/courses/details', auth.isLoggedIn, auth.isAdmin, course.getCourseDetails);
     app.get('/courses/students/:code',auth.isLoggedIn, auth.isAdmin, course.listAllStudentsInCourse);
     app.post('/courses', auth.isLoggedIn, auth.isAdmin, course.createCourse);
     app.put('/courses/:code', auth.isLoggedIn, auth.isAdmin, course.updateCourse);

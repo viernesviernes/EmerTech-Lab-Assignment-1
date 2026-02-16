@@ -380,6 +380,7 @@ function StudentTable({ students, functions }) {
 
 function CourseTable({ courses, functions }) {
 
+    const [expandedCourseKey, setExpandedCourseKey] = useState(null);
     const [newCourseCode, setNewCourseCode] = useState("");
     const [newCourseName, setNewCourseName] = useState("");
     const [newSection, setNewSection] = useState("");
@@ -431,7 +432,13 @@ function CourseTable({ courses, functions }) {
             <div className="courses-container">
                 {
                     courses.map((course) => (
-                        <CourseCard key={course.id ?? course._id} course={course} functions={{ editCourse, deleteCourse }} />
+                        <CourseCard
+                            key={course.id ?? course._id}
+                            course={course}
+                            functions={{ editCourse, deleteCourse }}
+                            expandedCourseKey={expandedCourseKey}
+                            onToggleExpand={setExpandedCourseKey}
+                        />
                     ))
                 }
             </div>

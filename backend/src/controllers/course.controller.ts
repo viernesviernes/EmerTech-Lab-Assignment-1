@@ -33,6 +33,33 @@ async function listAllStudentsInCourse (req: Request, res: Response){
     }
 }
 
+async function getCourseDetails(req: Request, res: Response) {
+    const Course = getCourseModel();
+    const code = Number(req.query.code);
+    const section = Number(req.query.section);
+    if (!code || !section) {
+        return res.status(400).json({ message: "Course code and section are required" });
+    }
+    try {
+        const course = await Course.findOne({ code, section })
+            .populate({ path: 'students', select: 'studentNumber firstName lastName email' })
+            .lean()
+            .exec();
+        if (!course) {
+            return res.status(404).json({ message: "Course not found" });
+        }
+        const { students, ...courseInfo } = course;
+        return res.status(200).json({
+            data: {
+                course: courseInfo,
+                students: students || [],
+            },
+        });
+    } catch (err: any) {
+        return res.status(500).json({ message: err.message });
+    }
+}
+
 
 async function createCourse (req: Request, res: Response){
     const Course = getCourseModel();
@@ -91,6 +118,7 @@ async function deleteCourse (req: Request, res: Response){
 module.exports = {
     listAllCourses,
     listAllStudentsInCourse,
+    getCourseDetails,
     createCourse,
     updateCourse,
     deleteCourse,
