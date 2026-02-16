@@ -16,11 +16,12 @@ function StudentLogin() {
         event.preventDefault();
 
         try {
-                const response = await fetch(`http://localhost:3000/signin/student`, {
+                const response = await fetch(`api/signin/student`, {
                 method: 'POST',
                 headers: {
                 'Content-Type': 'application/json',
                 },
+                credentials: 'include',
                 body: JSON.stringify({ username: username, password: password }),
             });
             

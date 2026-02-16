@@ -18,7 +18,7 @@ function AdminLogin() {
         event.preventDefault();
 
         try {
-                const response = await fetch(`/api/admin`, {
+                const response = await fetch(`/api/signin/admin`, {
                 method: 'POST',
                 headers: {
                 'Content-Type': 'application/json',

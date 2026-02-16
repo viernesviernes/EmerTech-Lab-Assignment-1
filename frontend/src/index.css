@@ -97,3 +97,41 @@ button {
     display: inline-block;
     margin: 10px;
 }
+
+
+.enrollSection {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 8px;
+    gap: 8px;
+    align-items: center;
+}
+
+.enrollSectionInner {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-start;
+}
+
+.enrollSectionTitle {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.enrollSectionRow {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.enrollSectionInput {
+    min-width: 120px;
+}
+
+.changeSectionRow {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: flex-end;
+}

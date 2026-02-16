@@ -2,6 +2,7 @@ import { useState, useContext } from 'react';
 import AuthContext from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
+import './Students.css';
 
 export default function StudentDashboard() {
     const { user } = useContext(AuthContext);
@@ -12,74 +13,59 @@ export default function StudentDashboard() {
     const [view, setView] = useState('');
     const [courses, setCourses] = useState([]);
 
-    const addNewCourse = async (newCourseCode, newCourseName, newCourseSection, newCourseSemester) => {
-        const newCourse = {
-            courseCode: newCourseCode,
-            courseName: newCourseName,
-            section: newCourseSection,
-            semester: newCourseSemester,
-            students: [user.studentNumber]
-         };
-
-         try {
-            console.log('Adding new course:', newCourse);
-            const response = await fetch(`/api/courses`, 
-                {
+    const enrollCourse = async (courseCode, section) => {
+        try {
+            const response = await fetch(`/api/student/courses`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(newCourse),
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code: Number(courseCode), section: Number(section) }),
             });
             if (response.ok) {
-                console.log('New course added successfully:', newCourse);
-                fetchCourses(); // Refresh the courses list after adding a new course
+                fetchCourses();
             } else {
-                console.error('Failed to add new course:', response.statusText);
+                const err = await response.json();
+                console.error(err.message || 'Failed to enroll');
             }
-         } catch (error) {
-            console.error('Error adding new course:', error);
-         }
-    };
-
-    const editCourse = async (course) => {
-        console.log('Edit course:', course);
-        const response = await fetch(`/api/courses/${course.courseCode}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(course),
-        });
-        if (response.ok) {
-            console.log('Course updated successfully:', course);
-            fetchCourses(); // Refresh the courses list after editing a course
-        } else {
-            console.error('Failed to update course:', response.statusText);
+        } catch (error) {
+            console.error('Error enrolling:', error);
         }
     };
 
-    const deleteCourse = async (course) => {
-        const response = await fetch(`/api/courses/${course.courseCode}`, {
+    const changeSection = async (courseCode, section) => {
+        const response = await fetch(`/api/student/courses/${courseCode}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ section: Number(section) }),
+        });
+        if (response.ok) {
+            fetchCourses();
+        } else {
+            const err = await response.json();
+            throw new Error(err.message || 'Failed to change section');
+        }
+    };
+
+    const dropCourse = async (course) => {
+        const response = await fetch(`/api/student/courses`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
             },
+            body: JSON.stringify({ code: course.code, section: course.section }),
         });
         if (response.ok) {
-            console.log('Course deleted successfully:', course);
-            fetchCourses(); // Refresh the courses list after deleting a course
+            setCourses((prev) => prev.filter((c) => c.id !== course.id));
         } else {
-            console.error('Failed to delete course:', response.statusText);
+            console.error('Failed to drop course:', response.statusText);
         }
     }
 
     const fetchCourses = async () => {
-        fetch(`/api/students/${user.studentNumber}/courses`)
+        fetch(`/api/student/courses`)
             .then(res => res.json())
             .then(data => {
-                setCourses(data);
-                console.log('Fetched courses for student:', user.studentNumber, data);
+                setCourses(data.data);
+                console.log('Fetched courses for student:',  data);
             })
             .catch(error => console.error('Error fetching courses:', error));
     }
@@ -99,42 +85,73 @@ export default function StudentDashboard() {
             
             <button onClick={() => setView('yourCourses')}>View Your Courses</button>
             <button onClick={() => setView('otherCourses')}>View Other Student's Courses</button>
-            {view === 'yourCourses' && <YourCourses courses={courses} functions={{ addNewCourse, editCourse, deleteCourse }} />}
+            {view === 'yourCourses' && <YourCourses courses={courses} functions={{ changeSection, dropCourse, enrollCourse }} />}
             {view === 'otherCourses' && <OtherCourses />}
         </>
     )
 }
 
+function formatSection(section) {
+    return String(section ?? '').padStart(3, '0');
+}
+
 function YourCourses({ courses, functions }) {
 
-    const { addNewCourse, editCourse, deleteCourse } = functions;
+    const { changeSection, dropCourse, enrollCourse } = functions;
 
-    // New row-exclusive state
-    const [newCourseCode, setNewCourseCode] = useState('');
-    const [newCourseName, setNewCourseName] = useState('');
-    const [newCourseSection, setNewCourseSection] = useState('');
-    const [newCourseSemester, setNewCourseSemester] = useState('');
+    const [enrollCode, setEnrollCode] = useState('');
+    const [enrollSection, setEnrollSection] = useState('');
+    const [changingSectionCode, setChangingSectionCode] = useState(null);
+    const [sectionDraft, setSectionDraft] = useState('');
 
-    // State to track editing
-    const [editingCourseCode, setEditingCourseCode] = useState(null);
-    const [editedCourse, setEditedCourse] = useState({});
-
-    const handleEditClick = (course) => {
-        setEditingCourseCode(course.courseCode);
-        setEditedCourse({ ...course });
+    const handleChangeSectionClick = (course) => {
+        setChangingSectionCode(course.code);
+        setSectionDraft(String(course.section ?? ''));
     };
 
-    const handleInputChange = (field, value) => {
-        setEditedCourse((prev) => ({ ...prev, [field]: value }));
+    const handleSectionSubmit = async (courseCode) => {
+        try {
+            await changeSection(courseCode, sectionDraft);
+            setChangingSectionCode(null);
+        } catch (e) {
+            window.alert(e.message || 'Failed to change section');
+        }
     };
 
-    const handleSaveClick = () => {
-        editCourse(editedCourse);
-        setEditingCourseCode(null);
+    const handleEnroll = () => {
+        if (!enrollCode.trim() || !enrollSection.trim()) return;
+        enrollCourse(enrollCode, enrollSection);
+        setEnrollCode('');
+        setEnrollSection('');
     };
 
     return (
         <>
+            <div className="enrollSection">
+                <div className="enrollSectionInner">
+                    <h2 className="enrollSectionTitle">Enroll in Course</h2>
+                    <div className="enrollSectionRow">
+                        <input
+                            type="text"
+                            className="enrollSectionInput"
+                            placeholder="Course code"
+                            value={enrollCode}
+                            onChange={(e) => setEnrollCode(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && handleEnroll()}
+                        />
+                        <input
+                            type="text"
+                            className="enrollSectionInput"
+                            placeholder="Section"
+                            value={enrollSection}
+                            onChange={(e) => setEnrollSection(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && handleEnroll()}
+                        />
+                        <button type="button" onClick={handleEnroll}>Enroll</button>
+                    </div>
+                </div>
+            </div>
+
             <table border="1" id="courseTable">
                 <thead>
                     <tr>
@@ -142,39 +159,38 @@ function YourCourses({ courses, functions }) {
                         <th>Course Name</th>
                         <th>Section</th>
                         <th>Semester</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     {courses.map((course) => (
-                        <tr key={course.courseCode}>
-                            {editingCourseCode === course.courseCode ? (
-                                <>
-                                    <td><input type="text" value={editedCourse.courseCode} onChange={(e) => handleInputChange('courseCode', e.target.value)} /></td>
-                                    <td><input type="text" value={editedCourse.courseName} onChange={(e) => handleInputChange('courseName', e.target.value)} /></td>
-                                    <td><input type="text" value={editedCourse.section} onChange={(e) => handleInputChange('section', e.target.value)} /></td>
-                                    <td><input type="text" value={editedCourse.semester} onChange={(e) => handleInputChange('semester', e.target.value)} /></td>
-                                    <td><button onClick={handleSaveClick}>Save</button></td>
-                                    <td><button onClick={() => setEditingCourseCode(null)}>Cancel</button></td>
-                                </>
-                            ) : (
-                                <>
-                                    <td>{course.courseCode}</td>
-                                    <td>{course.courseName}</td>
-                                    <td>{course.section}</td>
-                                    <td>{course.semester}</td>
-                                    <td><button onClick={() => handleEditClick(course)}>Edit</button></td>
-                                    <td><button onClick={() => deleteCourse(course)}>Delete</button></td>
-                                </>
-                            )}
+                        <tr key={course.id}>
+                            <td>{course.code}</td>
+                            <td>{course.name}</td>
+                            <td>{formatSection(course.section)}</td>
+                            <td>{course.semester}</td>
+                            <td>
+                                {changingSectionCode === course.code ? (
+                                    <div className="changeSectionRow">
+                                        <input
+                                            type="text"
+                                            value={sectionDraft}
+                                            onChange={(e) => setSectionDraft(e.target.value)}
+                                            onKeyDown={(e) => e.key === 'Enter' && handleSectionSubmit(course.code)}
+                                        />
+                                        <button type="button" onClick={() => handleSectionSubmit(course.code)}>Change</button>
+                                        <button type="button" onClick={() => setChangingSectionCode(null)}>Cancel</button>
+                                        <button type="button" onClick={() => dropCourse(course)}>Drop</button>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <button type="button" onClick={() => handleChangeSectionClick(course)}>Change Section</button>
+                                        <button type="button" onClick={() => dropCourse(course)}>Drop</button>
+                                    </>
+                                )}
+                            </td>
                         </tr>
                     ))}
-                    <tr>
-                        <td><input type="text" placeholder="Course Code" onChange={(e) => setNewCourseCode(e.target.value)} /></td>
-                        <td><input type="text" placeholder="Course Name" onChange={(e) => setNewCourseName(e.target.value)} /></td>
-                        <td><input type="text" placeholder="Section" onChange={(e) => setNewCourseSection(e.target.value)} /></td>
-                        <td><input type="text" placeholder="Semester" onChange={(e) => setNewCourseSemester(e.target.value)} /></td>
-                        <td><button onClick={() => addNewCourse(newCourseCode, newCourseName, newCourseSection, newCourseSemester)}>Add</button></td>
-                    </tr>
                 </tbody>
             </table>
         </>
