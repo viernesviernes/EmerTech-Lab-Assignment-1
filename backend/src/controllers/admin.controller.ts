@@ -49,7 +49,10 @@ function createStudentAccount(req: any, res: any, next: any) {
             return res.status(200).json(savedUser);
         })
         .catch((err: any) => {
-            return res.status(500).json({message: err.message});
+            const firstMessage = err.errors && Object.values(err.errors)[0]
+                ? (Object.values(err.errors)[0] as any).message
+                : err.message;
+            return res.status(500).json({ message: firstMessage });
         });
 }
 
