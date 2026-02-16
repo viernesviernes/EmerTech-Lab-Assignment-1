@@ -15,9 +15,10 @@ function getCourseModel(): Model<CourseDocument> {
 async function addCourse(req: Request, res: Response) {
     const Course = getCourseModel();
     const userId = (req as any).userId;
-    const courseCode = Number(req.body.code);
+    const code = Number(req.body.code);
+    const section = Number(req.body.section);
     try {
-        const course = await Course.findOne({ code: courseCode }).exec();
+        const course = await Course.findOne({ code, section }).exec();
         if (!course) return res.status(404).json({ message: "Course not found" });
         if (course.students.some((id: any) => id.toString() === userId)) {
             return res.status(400).json({ message: "Already enrolled in this course" });
@@ -30,18 +31,26 @@ async function addCourse(req: Request, res: Response) {
     }
 }
 
+/** Move student from current (code, section) to same code, new section. */
 async function updateCourse(req: Request, res: Response) {
     const Course = getCourseModel();
-    const courseCode = Number(req.params.code);
-    const { section } = req.body;
+    const userId = (req as any).userId;
+    const code = Number(req.params.code);
+    const newSection = Number(req.body.section);
     try {
-        const course = await Course.findOneAndUpdate(
-            { code: courseCode },
-            { section },
-            { new: true, runValidators: true }
-        ).exec();
-        if (!course) return res.status(404).json({ message: "Course not found" });
-        return res.status(200).json({ data: course });
+        const fromCourse = await Course.findOne({ code, students: userId }).exec();
+        if (!fromCourse) return res.status(404).json({ message: "Not enrolled in this course" });
+        fromCourse.students = fromCourse.students.filter((id: any) => id.toString() !== userId);
+        await fromCourse.save();
+
+        const toCourse = await Course.findOne({ code, section: newSection }).exec();
+        if (!toCourse) return res.status(404).json({ message: "Course section not found" });
+        if (toCourse.students.some((id: any) => id.toString() === userId)) {
+            return res.status(400).json({ message: "Already in that section" });
+        }
+        toCourse.students.push(userId);
+        await toCourse.save();
+        return res.status(200).json({ data: toCourse });
     } catch (err: any) {
         return res.status(500).json({ message: err.message });
     }
@@ -50,9 +59,10 @@ async function updateCourse(req: Request, res: Response) {
 async function dropCourse(req: Request, res: Response) {
     const Course = getCourseModel();
     const userId = (req as any).userId;
-    const courseCode = Number(req.body.code);
+    const code = Number(req.body.code);
+    const section = Number(req.body.section);
     try {
-        const course = await Course.findOne({ code: courseCode }).exec();
+        const course = await Course.findOne({ code, section }).exec();
         if (!course) return res.status(404).json({ message: "Course not found" });
         course.students = course.students.filter((id: any) => id.toString() !== userId);
         await course.save();

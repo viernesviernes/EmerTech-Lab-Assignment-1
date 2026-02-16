@@ -47,12 +47,10 @@ function signInHandler(isAdmin: boolean){
                 { algorithm: 'HS256', expiresIn: 300 }
             );
 
-            res.cookie('token', token, { maxAge: 300 * 1000, httpOnly: true });
-            res.status(200).send({ screen: user.username });
-
-            return next();
+            res.cookie('token', token, { maxAge: 300 * 1000, httpOnly: true, sameSite: 'lax' });
+            return res.status(200).send({ screen: user.username });
         } else {
-            res.json({
+            return res.status(404).json({
                 status: "error",
                 message: "Invalid username/password!!!",
                 data: null
