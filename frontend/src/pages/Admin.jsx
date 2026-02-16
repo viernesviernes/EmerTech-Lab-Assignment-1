@@ -108,7 +108,7 @@ export default function AdminDashboard() {
             });
             if (response.ok) {
                 const data = await response.json();
-                setCourses(data);
+                setCourses(data.data ?? data);
             } else {
                 console.error('Failed to fetch courses:', response.statusText);
             }
@@ -119,29 +119,31 @@ export default function AdminDashboard() {
 
     const addNewCourse = async (newCourseCode, newCourseName, newSection, newSemester) => {
         const newCourse = {
-            courseCode: newCourseCode,
-            courseName: newCourseName,
-            section: newSection,
-            semester: newSemester,
-            students: []
+            code: Number(newCourseCode),
+            name: String(newCourseName),
+            section: Number(newSection),
+            semester: Number(newSemester),
         };
-        const response = await fetch(`/api/courses`, 
-            {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(newCourse),
-        });
-        if (response.ok) {
-            console.log('New course added successfully:', newCourse);
-            fetchCourses(); // Refresh the courses list after adding a new course
+        try {
+            const response = await fetch(`/api/courses`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newCourse),
+            });
+            if (response.ok) {
+                fetchCourses();
+            } else {
+                const err = await response.json().catch(() => ({}));
+                window.alert(err.message || 'Failed to add course');
+            }
+        } catch (e) {
+            window.alert('Failed to add course');
         }
     }
 
     const editCourse = async (course) => {
         console.log('Edit course:', course);
-        const response = await fetch(`/api/courses/${course.courseCode}`, {
+        const response = await fetch(`/api/courses/${course.code}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -149,25 +151,25 @@ export default function AdminDashboard() {
             body: JSON.stringify(course),
         });
         if (response.ok) {
-            console.log('Course updated successfully:', course);
-            fetchCourses(); // Refresh the courses list after editing a course
+            fetchCourses();
         } else {
-            console.error('Failed to update course:', response.statusText);
+            const err = await response.json().catch(() => ({}));
+            window.alert(err.message || 'Failed to update course');
         }
     }
 
     const deleteCourse = async (course) => {
-        const response = await fetch(`/api/courses/${course.courseCode}`, {
+        const response = await fetch(`/api/courses/${course.code}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
             },
         });
         if (response.ok) {
-            console.log('Course deleted successfully:', course);
-            fetchCourses(); // Refresh the courses list after deleting a course
+            fetchCourses();
         } else {
-            console.error('Failed to delete course:', response.statusText);
+            const err = await response.json().catch(() => ({}));
+            window.alert(err.message || 'Failed to delete course');
         }
     }
 
@@ -355,7 +357,7 @@ function CourseTable({ courses, functions }) {
             <div className="courses-container">
                 {
                     courses.map((course) => (
-                        <CourseCard key={course.courseCode} course={course} functions={{ editCourse, deleteCourse }} />
+                        <CourseCard key={course.id ?? course._id} course={course} functions={{ editCourse, deleteCourse }} />
                     ))
                 }
             </div>

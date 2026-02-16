@@ -33,7 +33,7 @@ export default function CourseCard({ course, functions, isEditing }) {
 
     return (
         <div className="course-card">
-            <h3>{course.courseCode} - {course.courseName}</h3>
+            <h3>{course.code} - {course.name}</h3>
             <button onClick={() => deleteCourse(course)}>Delete</button>
             <p>Section: {course.section}</p>
             <p>Semester: {course.semester}</p>
