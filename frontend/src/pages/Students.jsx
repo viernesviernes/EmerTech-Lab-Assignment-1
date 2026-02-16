@@ -2,15 +2,12 @@ import { useState, useContext } from 'react';
 import AuthContext from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
-import './Students.css';
 
 export default function StudentDashboard() {
     const { user } = useContext(AuthContext);
 
     const navigate = useNavigate();
 
-    // General state
-    const [view, setView] = useState('');
     const [courses, setCourses] = useState([]);
 
     const enrollCourse = async (courseCode, section) => {
@@ -82,11 +79,7 @@ export default function StudentDashboard() {
     return (
         <>
             <div>This is the student dashboard page.</div>
-            
-            <button onClick={() => setView('yourCourses')}>View Your Courses</button>
-            <button onClick={() => setView('otherCourses')}>View Other Student's Courses</button>
-            {view === 'yourCourses' && <YourCourses courses={courses} functions={{ changeSection, dropCourse, enrollCourse }} />}
-            {view === 'otherCourses' && <OtherCourses />}
+            <YourCourses courses={courses} functions={{ changeSection, dropCourse, enrollCourse }} />
         </>
     )
 }
@@ -189,52 +182,6 @@ function YourCourses({ courses, functions }) {
                                     </>
                                 )}
                             </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </>
-    )
-}
-
-function OtherCourses() {
-
-    const [studentNo, setStudentNo] = useState('');
-
-    const [courses, setCourses] = useState([]);
-
-    const handleSubmit = async (event) => {
-        event.preventDefault();
-
-        // Fetch courses for the entered student number
-        await fetch(`/api/students/${studentNo}/courses`)
-            .then(res => res.json())
-            .then(data => setCourses(data));
-    }
-
-    return (
-        <>
-            <form onSubmit={handleSubmit}>
-                <label>Enter Student Number:</label>
-                <input type="text" value={studentNo} onChange={(e) => setStudentNo(e.target.value)} required />
-                <button type="submit">View Courses</button>
-            </form>
-            <table border="1">
-                <thead>
-                    <tr>
-                        <th>Course Code</th>
-                        <th>Course Name</th>
-                        <th>Section</th>
-                        <th>Semester</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {courses.map((course) => (
-                        <tr key={course.courseCode}>
-                            <td>{course.courseCode}</td>
-                            <td>{course.courseName}</td>
-                            <td>{course.section}</td>
-                            <td>{course.semester}</td>
                         </tr>
                     ))}
                 </tbody>
