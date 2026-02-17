@@ -15,5 +15,4 @@ module.exports = (app: any) => {
     app.post('/admin/student', auth.isLoggedIn, auth.isAdmin, admin.createStudentAccount);
     app.put('/admin/students/:userId', auth.isLoggedIn, auth.isAdmin, setUserIdFromParam, admin.updateStudentAccount);
     app.delete('/admin/students/:userId', auth.isLoggedIn, auth.isAdmin, setUserIdFromParam, admin.deleteStudentAccount);
-    app.get('/admin/test', auth.isLoggedIn, auth.isAdmin, admin.testRoute);
 };

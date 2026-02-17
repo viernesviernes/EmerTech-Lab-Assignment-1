@@ -7,5 +7,4 @@ module.exports = (app: any) => {
     app.post('/student/courses', auth.isLoggedIn, student.addCourse);
     app.put('/student/courses/:code', auth.isLoggedIn, student.updateCourse);
     app.delete('/student/courses', auth.isLoggedIn, student.dropCourse);
-    app.get('/student/test', auth.isLoggedIn, student.testRoute);
 };

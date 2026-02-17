@@ -1,0 +1,70 @@
+[
+  {
+    "code": 101,
+    "name": "Introduction to Programming",
+    "section": 1,
+    "semester": 1,
+    "students": [
+      { "$oid": "507f1f77bcf86cd799439001" },
+      { "$oid": "507f1f77bcf86cd799439002" },
+      { "$oid": "507f1f77bcf86cd799439003" },
+      { "$oid": "507f1f77bcf86cd799439004" },
+      { "$oid": "507f1f77bcf86cd799439005" },
+      { "$oid": "507f1f77bcf86cd799439006" },
+      { "$oid": "507f1f77bcf86cd799439007" },
+      { "$oid": "507f1f77bcf86cd799439008" },
+      { "$oid": "507f1f77bcf86cd799439009" },
+      { "$oid": "507f1f77bcf86cd79943900a" }
+    ]
+  },
+  {
+    "code": 101,
+    "name": "Introduction to Programming",
+    "section": 2,
+    "semester": 1,
+    "students": [
+      { "$oid": "507f1f77bcf86cd799439001" },
+      { "$oid": "507f1f77bcf86cd799439004" },
+      { "$oid": "507f1f77bcf86cd799439007" },
+      { "$oid": "507f1f77bcf86cd79943900a" }
+    ]
+  },
+  {
+    "code": 201,
+    "name": "Data Structures",
+    "section": 1,
+    "semester": 2,
+    "students": [
+      { "$oid": "507f1f77bcf86cd799439001" },
+      { "$oid": "507f1f77bcf86cd799439003" },
+      { "$oid": "507f1f77bcf86cd799439005" },
+      { "$oid": "507f1f77bcf86cd799439006" },
+      { "$oid": "507f1f77bcf86cd799439009" }
+    ]
+  },
+  {
+    "code": 202,
+    "name": "Algorithms",
+    "section": 1,
+    "semester": 2,
+    "students": [
+      { "$oid": "507f1f77bcf86cd799439003" },
+      { "$oid": "507f1f77bcf86cd799439006" },
+      { "$oid": "507f1f77bcf86cd799439007" }
+    ]
+  },
+  {
+    "code": 301,
+    "name": "Database Systems",
+    "section": 1,
+    "semester": 3,
+    "students": [
+      { "$oid": "507f1f77bcf86cd799439001" },
+      { "$oid": "507f1f77bcf86cd799439002" },
+      { "$oid": "507f1f77bcf86cd799439005" },
+      { "$oid": "507f1f77bcf86cd799439007" },
+      { "$oid": "507f1f77bcf86cd799439009" },
+      { "$oid": "507f1f77bcf86cd79943900a" }
+    ]
+  }
+]

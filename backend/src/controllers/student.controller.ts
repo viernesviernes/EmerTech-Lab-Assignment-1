@@ -99,16 +99,10 @@ async function getUserInfo(req: Request, res: Response){
 };
 
 
-function testRoute (req: Request, res: Response){
-    const userId = (req as any).userId;
-    res.status(200).send({message: `This route is protected, your id is: ${userId}`, })
-} 
-
 module.exports = {
     addCourse,
     updateCourse,
     dropCourse,
     listUserCourses,
     getUserInfo,
-    testRoute,
 };

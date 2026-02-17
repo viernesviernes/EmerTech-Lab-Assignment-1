@@ -6,7 +6,6 @@ var mongoose = require('./config/mongoose'),
  express = require('./config/express');
 
 require('dotenv').config({ path: './src/config/.env' });
-console.log(process.env.S3_BUCKET)
 
 mongoose();
 
