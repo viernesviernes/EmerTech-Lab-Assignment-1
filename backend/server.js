@@ -2,10 +2,12 @@ const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, 'src', 'config', '.env') });
 const express = require('express');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const { ApolloServer } = require('@apollo/server');
 const { expressMiddleware } = require('@apollo/server/express4');
 const typeDefs = require('./graphql/typeDefs');
 const resolvers = require('./graphql/resolvers');
+const { getTokenFromReq, verify } = require('./graphql/auth');
 
 const mongoose = require('mongoose');
 
@@ -41,8 +43,16 @@ const startServer = async () => {
       origin: true,
       credentials: true,
     }),
+    cookieParser(),
     express.json(),
-    expressMiddleware(server)
+    expressMiddleware(server, {
+      context: async ({ req, res }) => {
+        const token = getTokenFromReq(req);
+        const payload = verify(token);
+        const user = payload ? { id: payload.id, role: payload.role } : null;
+        return { req, res, user };
+      },
+    })
   );
 
   app.listen(PORT, () => {
