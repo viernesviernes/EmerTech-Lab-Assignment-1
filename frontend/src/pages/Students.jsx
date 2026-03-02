@@ -2,78 +2,71 @@ import { useState, useContext } from 'react';
 import AuthContext from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
+import { useQuery, useMutation } from '@apollo/client/react';
+import {
+  GET_STUDENT_COURSES,
+  ENROLL_COURSE,
+  CHANGE_SECTION,
+  DROP_COURSE,
+} from '../graphql/queries';
 
 export default function StudentDashboard() {
     const { user } = useContext(AuthContext);
-
     const navigate = useNavigate();
 
-    const [courses, setCourses] = useState([]);
+    const { data, refetch: refetchCourses } = useQuery(GET_STUDENT_COURSES, {
+        variables: { studentId: user?._id ?? '' },
+        skip: !user?._id,
+    });
+    const courses = data?.studentCourses ?? [];
+
+    const [enrollCourseMutation] = useMutation(ENROLL_COURSE);
+    const [changeSectionMutation] = useMutation(CHANGE_SECTION);
+    const [dropCourseMutation] = useMutation(DROP_COURSE);
 
     const enrollCourse = async (courseCode, section) => {
+        if (!user?._id) return;
         try {
-            const response = await fetch(`/api/student/courses`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ code: Number(courseCode), section: Number(section) }),
+            await enrollCourseMutation({
+                variables: { studentId: user._id, code: Number(courseCode), section: Number(section) },
             });
-            if (response.ok) {
-                fetchCourses();
-            } else {
-                const err = await response.json();
-                console.error(err.message || 'Failed to enroll');
-            }
-        } catch (error) {
-            console.error('Error enrolling:', error);
+            refetchCourses();
+        } catch (e) {
+            console.error(e);
+            window.alert('Failed to enroll');
         }
     };
 
     const changeSection = async (courseCode, section) => {
-        const response = await fetch(`/api/student/courses/${courseCode}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ section: Number(section) }),
-        });
-        if (response.ok) {
-            fetchCourses();
-        } else {
-            const err = await response.json();
-            throw new Error(err.message || 'Failed to change section');
+        if (!user?._id) return;
+        try {
+            await changeSectionMutation({
+                variables: { studentId: user._id, courseCode: Number(courseCode), section: Number(section) },
+            });
+            refetchCourses();
+        } catch (e) {
+            console.error(e);
+            throw new Error('Failed to change section');
         }
     };
 
     const dropCourse = async (course) => {
-        const response = await fetch(`/api/student/courses`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ code: course.code, section: course.section }),
-        });
-        if (response.ok) {
-            setCourses((prev) => prev.filter((c) => c.id !== course.id));
-        } else {
-            console.error('Failed to drop course:', response.statusText);
+        if (!user?._id) return;
+        try {
+            await dropCourseMutation({
+                variables: { studentId: user._id, code: course.code, section: course.section },
+            });
+            refetchCourses();
+        } catch (e) {
+            console.error(e);
+            window.alert('Failed to drop course');
         }
-    }
-
-    const fetchCourses = async () => {
-        fetch(`/api/student/courses`)
-            .then(res => res.json())
-            .then(data => {
-                setCourses(data.data);
-                console.log('Fetched courses for student:',  data);
-            })
-            .catch(error => console.error('Error fetching courses:', error));
-    }
+    };
 
     useEffect(() => {
         if (!user) {
             navigate('/login');
-            return null; // Return null to prevent rendering the dashboard while redirecting
         }
-
-        fetchCourses();
     }, [user, navigate]);
 
     return (

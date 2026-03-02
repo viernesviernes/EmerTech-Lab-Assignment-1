@@ -1,5 +1,11 @@
 const typeDefs = `#graphql
+  type Admin {
+    _id: ID!
+    username: String!
+  }
+
   type Student {
+    _id: ID
     id: ID!
     studentNumber: Int!
     firstName: String!
@@ -15,6 +21,7 @@ const typeDefs = `#graphql
   }
 
   type Course {
+    _id: ID
     id: ID!
     code: Int!
     name: String!
@@ -26,6 +33,7 @@ const typeDefs = `#graphql
   type Query {
     students: [Student]
     courses: [Course]
+    studentCourses(studentId: ID!): [Course]
   }
 
   type Mutation {
@@ -77,6 +85,13 @@ const typeDefs = `#graphql
     ): Course
 
     deleteCourse(id: ID!): Boolean
+
+    signInAdmin(username: String!, password: String!): Admin
+    signInStudent(username: String!, password: String!): Student
+
+    enrollCourse(studentId: ID!, code: Int!, section: Int!): Course
+    changeSection(studentId: ID!, courseCode: Int!, section: Int!): Course
+    dropCourse(studentId: ID!, code: Int!, section: Int!): Course
   }
 `;
 

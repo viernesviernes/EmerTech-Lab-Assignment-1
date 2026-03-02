@@ -11,10 +11,13 @@ import Students from './pages/Students'
 import Admin from './pages/Admin'
 import { AuthProvider } from './context/AuthContext'
 
-const link = new HttpLink({ uri: 'http://localhost:4000' })
+const graphqlUri = import.meta.env.VITE_GRAPHQL_URI ?? 'http://localhost:4000/graphql'
 
 const client = new ApolloClient({
-  link,
+  link: new HttpLink({
+    uri: graphqlUri,
+    credentials: 'include',
+  }),
   cache: new InMemoryCache(),
 })
 

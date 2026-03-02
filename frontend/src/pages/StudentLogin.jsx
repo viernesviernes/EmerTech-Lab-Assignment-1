@@ -1,42 +1,34 @@
 import { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useMutation } from '@apollo/client/react';
 import AuthContext from '../context/AuthContext';
+import { SIGN_IN_STUDENT } from '../graphql/queries';
 
 function StudentLogin() {
 
     const navigate = useNavigate();
     const { user, SaveUser } = useContext(AuthContext);
 
-    // State for form inputs
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
 
-    const handleLogin = async (event) => {
+    const [signInStudent] = useMutation(SIGN_IN_STUDENT);
 
+    const handleLogin = async (event) => {
         event.preventDefault();
 
         try {
-                const response = await fetch(`api/signin/student`, {
-                method: 'POST',
-                headers: {
-                'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-                body: JSON.stringify({ username: username, password: password }),
+            const result = await signInStudent({
+                variables: { username, password },
             });
-            
-            if (response.ok) {
-                const { student } = await response.json();
+            const student = result?.data?.signInStudent;
+            if (student) {
                 SaveUser(student);
-                console.log('Login successful:', student);
                 navigate('/students');
-            } else {
-                console.error('Login failed:', response.statusText);
-                const data = await response.json();
-                window.alert(data.message);
             }
         } catch (error) {
-            console.error('Error during login:', error);
+            console.error(error);
+            window.alert('Login failed');
         }
     };
 
@@ -54,7 +46,7 @@ function StudentLogin() {
             <div>
                 <h1>Student Login</h1>
                 <form onSubmit={handleLogin}>
-                    <label>Student Number:</label>
+                    <label>Username:</label>
                     <input type="text" id="username" name="username" value={username} onChange={(e) => setUsername(e.target.value)} required />
                     <br />
                     <label>Password:</label>

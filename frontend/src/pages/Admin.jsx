@@ -2,6 +2,17 @@ import { useState, useContext } from 'react';
 import { useEffect } from 'react';
 import AuthContext from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useQuery, useMutation } from '@apollo/client/react';
+import {
+  GET_STUDENTS,
+  GET_COURSES,
+  ADD_STUDENT,
+  UPDATE_STUDENT,
+  DELETE_STUDENT,
+  ADD_COURSE,
+  UPDATE_COURSE,
+  DELETE_COURSE,
+} from '../graphql/queries';
 
 import CourseCard from '../components/CourseCard';
 
@@ -14,110 +25,50 @@ export default function AdminDashboard() {
     // General state
     const [view, setView] = useState('');
 
-    // For students view
-    const [students, setStudents] = useState([]);
+    const { data, refetch: refetchStudents } = useQuery(GET_STUDENTS);
+    const students = data?.students ?? [];
 
-    const fetchStudents = async () => {
-        try {
-            const response = await fetch(`/api/admin/students`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-            if (response.ok) {
-                const data = await response.json();
-                setStudents(data.data ?? data);
-            } else {
-                console.error('Failed to fetch students:', response.statusText);
-            }
-        } catch (error) {
-            console.error('Error fetching students:', error);
-        }
-    }
+    const [addStudentMutation] = useMutation(ADD_STUDENT);
+    const [updateStudentMutation] = useMutation(UPDATE_STUDENT);
+    const [deleteStudentMutation] = useMutation(DELETE_STUDENT);
 
     const addNewStudent = async (payload) => {
         try {
-            const response = await fetch(`/api/admin/student`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload),
-            });
-            if (response.ok) {
-                fetchStudents();
-            } else {
-                const err = await response.json().catch(() => ({}));
-                const firstError = err.message
-                    || (err.errors && Object.values(err.errors)[0]?.message)
-                    || 'Failed to add student';
-                window.alert(firstError);
-            }
+            await addStudentMutation({ variables: payload });
+            refetchStudents();
         } catch (e) {
-            window.alert(e.message || 'Failed to add student');
+            console.error(e);
+            window.alert('Failed to add student');
         }
-    }
+    };
 
     const editStudent = async (student) => {
         const { password, ...body } = student;
         try {
-            const response = await fetch(`/api/admin/students/${student._id}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(body),
-            });
-            if (response.ok) {
-                fetchStudents();
-            } else {
-                const err = await response.json().catch(() => ({}));
-                window.alert(err.message || 'Failed to update student');
-            }
+            await updateStudentMutation({ variables: { id: student._id, ...body } });
+            refetchStudents();
         } catch (e) {
+            console.error(e);
             window.alert('Failed to update student');
         }
-    }
+    };
 
     const deleteStudent = async (student) => {
         try {
-            const response = await fetch(`/api/admin/students/${student._id}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-            if (response.ok) {
-                fetchStudents();
-            } else {
-                const err = await response.json().catch(() => ({}));
-                window.alert(err.message || 'Failed to delete student');
-            }
+            await deleteStudentMutation({ variables: { id: student._id } });
+            refetchStudents();
         } catch (e) {
+            console.error(e);
             window.alert('Failed to delete student');
         }
-    }
+    };
 
-    // For courses view
-    const [courses, setCourses] = useState([]);
+    const { data: coursesData, refetch: refetchCourses } = useQuery(GET_COURSES);
+    const courses = coursesData?.courses ?? [];
 
-    const fetchCourses = async () => {
-        try {
-            const response = await fetch(`/api/courses`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-            if (response.ok) {
-                const data = await response.json();
-                setCourses(data.data ?? data);
-            } else {
-                console.error('Failed to fetch courses:', response.statusText);
-            }
-        } catch (error) {
-            console.error('Error fetching courses:', error);
-        }
-    }
+    const [addCourseMutation] = useMutation(ADD_COURSE);
+    const [updateCourseMutation] = useMutation(UPDATE_COURSE);
+    const [deleteCourseMutation] = useMutation(DELETE_COURSE);
 
     const addNewCourse = async (newCourseCode, newCourseName, newSection, newSemester) => {
         const newCourse = {
@@ -127,60 +78,37 @@ export default function AdminDashboard() {
             semester: Number(newSemester),
         };
         try {
-            const response = await fetch(`/api/courses`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newCourse),
-            });
-            if (response.ok) {
-                fetchCourses();
-            } else {
-                const err = await response.json().catch(() => ({}));
-                window.alert(err.message || 'Failed to add course');
-            }
+            await addCourseMutation({ variables: newCourse });
+            refetchCourses();
         } catch (e) {
+            console.error(e);
             window.alert('Failed to add course');
         }
-    }
+    };
 
     const editCourse = async (course) => {
-        console.log('Edit course:', course);
-        const response = await fetch(`/api/courses/${course.code}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(course),
-        });
-        if (response.ok) {
-            fetchCourses();
-        } else {
-            const err = await response.json().catch(() => ({}));
-            window.alert(err.message || 'Failed to update course');
+        try {
+            await updateCourseMutation({ variables: { id: course._id ?? course.id, code: course.code, name: course.name, section: course.section, semester: course.semester } });
+            refetchCourses();
+        } catch (e) {
+            console.error(e);
+            window.alert('Failed to update course');
         }
-    }
+    };
 
     const deleteCourse = async (course) => {
-        const response = await fetch(`/api/courses/${course.code}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-        if (response.ok) {
-            fetchCourses();
-        } else {
-            const err = await response.json().catch(() => ({}));
-            window.alert(err.message || 'Failed to delete course');
+        try {
+            await deleteCourseMutation({ variables: { id: course._id ?? course.id } });
+            refetchCourses();
+        } catch (e) {
+            console.error(e);
+            window.alert('Failed to delete course');
         }
-    }
+    };
 
     useEffect(() => {
         if (!user) {
             navigate('/admin');
-        } else {
-            fetchStudents();
-            fetchCourses();
         }
     }, [navigate, user]);
 

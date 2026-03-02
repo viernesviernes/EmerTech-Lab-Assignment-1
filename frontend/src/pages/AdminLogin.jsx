@@ -1,42 +1,34 @@
 import { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useMutation } from '@apollo/client/react';
 import AuthContext from '../context/AuthContext';
+import { SIGN_IN_ADMIN } from '../graphql/queries';
 
 function AdminLogin() {
 
     const navigate = useNavigate();
     const { user, SaveUser } = useContext(AuthContext);
 
-    // State for form inputs
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
 
+    const [signInAdmin] = useMutation(SIGN_IN_ADMIN);
+
     const handleLogin = async (event) => {
-
-        console.log('Attempting login with username:', username, password);
-
         event.preventDefault();
 
         try {
-                const response = await fetch(`/api/signin/admin`, {
-                method: 'POST',
-                headers: {
-                'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ username: username, password: password }),
-                credentials: 'include'
+            const result = await signInAdmin({
+                variables: { username, password },
             });
-
-            if (response.ok) {
-                const { admin } = await response.json();
+            const admin = result?.data?.signInAdmin;
+            if (admin) {
                 SaveUser(admin);
-                console.log('Login successful:', admin);
                 navigate('/admin-dashboard');
-            } else {
-                console.error('Login failed:', response.statusText);
             }
         } catch (error) {
-            console.error('Error during login:', error);
+            console.error(error);
+            window.alert('Login failed');
         }
     };
 
