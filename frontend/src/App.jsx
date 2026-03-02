@@ -5,7 +5,7 @@ function App() {
 
   return (
     <div>
-      <h1>Welcome to the App</h1>
+      <h1>Student App (CRUD + GraphQL)</h1>
       <button onClick={() => navigate('/login')}>Login as Student</button>
       <button onClick={() => navigate('/admin')}>Login as Admin</button>
     </div>
