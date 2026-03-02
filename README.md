@@ -21,4 +21,4 @@
 
 - `MONGODB_URL` – MongoDB connection string
 - `sessionSecret` – Secret for JWT/session
-- `ADMIN_KEY` – Key required in body when creating an admin (e.g. `POST /admin/create`)
+- `ADMIN_KEY` – Key required in body when creating an admin 
